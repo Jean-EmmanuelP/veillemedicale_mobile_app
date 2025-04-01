@@ -1,0 +1,38 @@
+{
+  "name": "veillemedicale-lynx",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rspeedy build",
+    "check": "biome check --write",
+    "dev": "rspeedy dev",
+    "format": "prettier --write .",
+    "preview": "rspeedy preview"
+  },
+  "dependencies": {
+    "@lynx-js/react": "^0.106.1",
+    "@lynx-js/tailwind-preset-canary": "^0.1.0-canary-20250331-60a3eda0",
+    "@tailwindcss/postcss": "^4.0.17",
+    "@tanstack/react-query": "^5.70.0",
+    "react-router": "^6.22.3",
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@lynx-js/qrcode-rsbuild-plugin": "^0.3.4",
+    "@lynx-js/react-rsbuild-plugin": "^0.9.3",
+    "@lynx-js/rspeedy": "^0.8.6",
+    "@lynx-js/types": "^3.2.0",
+    "@types/react": "^18.3.20",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
+    "prettier": "^3.5.2",
+    "typescript": "~5.7.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
+}

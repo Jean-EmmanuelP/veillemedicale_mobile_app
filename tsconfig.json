@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "allowImportingTsExtensions": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "sourceMap": true,
+    "baseUrl": "src",
+    "paths": {
+      "$components/*": ["components/*"],
+      "$screens/*": ["screens/*"],
+      "$types/*": ["types/*"],
+      "$hooks/*": ["hooks/*"],
+      "$api/*": ["api/*"],
+      "$assets/*": ["assets/*"],
+      "$layouts/*": ["layouts/*"]
+    }
+  },
+  "exclude": ["dist/"],
+}
