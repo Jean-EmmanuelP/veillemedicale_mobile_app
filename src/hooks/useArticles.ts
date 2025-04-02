@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabaseFetch } from '../utils/supabaseFetch.ts';
 
 const SUPABASE_URL = 'https://etxelhjnqbrgwuitltyk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eGVsaGpucWJyZ3d1aXRsdHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2OTE5NzAsImV4cCI6MjA1NjI2Nzk3MH0.EvaK9bCSYaBVaVOIgakKTAVoM8UrDYg2HX7Z-iyWoD4';
@@ -23,21 +24,9 @@ export const useArticles = () => {
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/showed_articles?select=id,title,grade,published_at,content,discipline,journal,link`,
-        {
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        }
+      const data = await supabaseFetch<Article[]>(
+        'showed_articles?select=id,title,grade,published_at,content,discipline,journal,link'
       );
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch articles');
-      }
-
-      const data = await response.json();
       setArticles(data);
       setLoading(false);
     } catch (err) {
