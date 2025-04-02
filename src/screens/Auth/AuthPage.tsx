@@ -14,6 +14,10 @@ export function AuthPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log(email);
+  }, [email]);
+
   const handleSubmit = async () => {
     try {
       const credentials: Credentials = { email, password };
@@ -48,7 +52,8 @@ export function AuthPage() {
             <input
               className="p-3 text-base border border-gray-200 rounded-lg outline-none"
               value={email}
-              onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
+              // @ts-ignore
+              bindinput={(e) => setEmail((e.detail as HTMLInputElement).value)}
               placeholder="email@example.com"
               type="email"
               autoComplete="email"
@@ -60,7 +65,8 @@ export function AuthPage() {
             <input
               className="p-3 text-base border border-gray-200 rounded-lg outline-none"
               value={password}
-              onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
+              // @ts-ignore
+              bindinput={(e) => setPassword((e.detail as HTMLInputElement).value)}
               type="password"
               placeholder="••••••••"
             />

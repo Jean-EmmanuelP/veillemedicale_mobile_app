@@ -12,7 +12,7 @@ export function TabBar() {
   ];
 
   return (
-    <view className="w-full bg-white border-t border-gray-200 flex items-center justify-around py-2">
+    <view className="w-full bg-white border-t border-gray-200 flex items-center justify-around py-4 pb-8">
       {tabs.map(tab => (
         <view
           key={tab.path}
@@ -22,8 +22,8 @@ export function TabBar() {
               : 'text-gray-500 hover:text-gray-700'}`}
           bindtap={() => navigate(tab.path)}
         >
-          <text className="text-xl mb-1">{tab.icon}</text>
-          <text className="text-xs">{tab.label}</text>
+          <text className="text-2xl mb-2">{tab.icon}</text>
+          <text className="text-sm">{tab.label}</text>
         </view>
       ))}
     </view>

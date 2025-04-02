@@ -24,7 +24,7 @@ export function Profile() {
   if (!user) return null;
 
   return (
-    <view className="w-full h-full bg-gray-50">
+    <view className="w-full h-full">
       <text className="text-2xl font-bold px-4 py-3">Profile</text>
       <view className="p-4 flex flex-col items-center">
         <image

@@ -6,10 +6,10 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <view className="w-full h-full flex flex-col bg-gray-50">
-      <view className="flex-1 overflow-hidden">
-        {children}
-      </view>
+    <view className="w-full h-full flex flex-col bg-white">
+        <view className="flex-1 overflow-hidden">
+          {children}
+        </view>
       <TabBar />
     </view>
   );
