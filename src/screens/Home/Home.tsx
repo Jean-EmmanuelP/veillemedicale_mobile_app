@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router';
 import { useUser } from '$hooks/useUser.ts';
 import { useQueryClient } from '@tanstack/react-query';
-import { AuthService } from '$api/auth.ts';
 import { useState } from 'react';
 import './Home.css';
 import { useAuthToken } from '$hooks/useAuthToken.ts';
@@ -41,7 +40,6 @@ export default function Home() {
   };
 
   const handleSignOut = () => {
-    AuthService.signOut();
     clearToken();
     queryClient.invalidateQueries({ queryKey: ['user'] });
   };

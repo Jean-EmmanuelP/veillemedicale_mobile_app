@@ -1,17 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserService } from '$api/user.ts';
 import { useUser } from '$hooks/useUser.ts';
+import { supabaseFetch } from '../../utils/supabaseFetch.ts';
+import { useAuthToken } from '../../hooks/useAuthToken.ts';
 
 interface PaywallProps {
   onClose: () => void;
   onSubscribeSuccess: () => void;
 }
 
+interface SubscriptionResponse {
+  id: string;
+  user_id: string;
+  plan: string;
+  duration: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface User {
+  id: string;
+  isSubscribed: boolean;
+  subscriptionPlan: string;
+  subscriptionEndDate: string;
+}
+
 const PLANS = [
-  { duration: '1 mois', pricePerWeek: 4.99, savings: 'Économisez 20%' },
-  { duration: '3 mois', pricePerWeek: 3.99, savings: 'Économisez 40%' },
-  { duration: '6 mois', pricePerWeek: 2.99, savings: 'Économisez 60%' },
+  { duration: '1 mois', interval: '1 month', pricePerWeek: 4.99, savings: 'Prix standard' },
+  { duration: '1 an', interval: '1 year', pricePerWeek: 1.99, savings: 'Économisez 80% - Meilleure offre!' },
 ];
 
 export function Paywall({ onClose, onSubscribeSuccess }: PaywallProps) {
@@ -19,13 +38,96 @@ export function Paywall({ onClose, onSubscribeSuccess }: PaywallProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(0);
   const { data: user } = useUser();
+  const { token } = useAuthToken();
+  
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(onClose, 300);
+  };
+
   const mutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!user?.id) throw new Error("Utilisateur non connecté");
-      return UserService.subscribeToPremium(user.id, PLANS[selectedPlan].duration);
+      
+      const now = new Date();
+      const startDate = now.toISOString();
+      const selectedPlanData = PLANS[selectedPlan];
+
+      console.log('Creating subscription with duration:', selectedPlanData.interval);
+
+      // Vérifier si l'utilisateur a déjà un abonnement actif
+      const existingSubscriptions = await supabaseFetch<SubscriptionResponse[]>(`subscriptions?user_id=eq.${user.id}&status=eq.active`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (existingSubscriptions && existingSubscriptions.length > 0) {
+        // Mettre à jour l'abonnement existant
+        const existingSubscription = existingSubscriptions[0];
+        
+        // Convertir les intervalles en jours pour comparaison
+        const intervalToDays: Record<string, number> = {
+          'month': 30,
+          'months': 30,
+          'year': 365
+        };
+        
+        const newInterval = selectedPlanData.interval.split(' ');
+        const existingInterval = existingSubscription.duration.split(' ');
+        
+        const newDays = parseInt(newInterval[0]) * intervalToDays[newInterval[1]];
+        const existingDays = parseInt(existingInterval[0]) * intervalToDays[existingInterval[1]];
+        
+        // Ne permet la mise à jour que si le nouvel abonnement est plus long
+        if (newDays <= existingDays) {
+          throw new Error("Vous ne pouvez pas passer à un abonnement plus court que votre abonnement actuel");
+        }
+
+        const response = await supabaseFetch<SubscriptionResponse>(`subscriptions?id=eq.${existingSubscription.id}`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            duration: selectedPlanData.interval,
+            start_date: startDate,
+            status: 'active'
+          })
+        });
+      } else {
+        // Créer un nouvel abonnement
+        const response = await supabaseFetch<SubscriptionResponse>('subscriptions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            plan: 'premium',
+            duration: selectedPlanData.interval,
+            start_date: startDate,
+            status: 'active'
+          })
+        });
+      }
+
+      // Récupérer les données utilisateur mises à jour
+      const updatedUser = await supabaseFetch<User>('auth/v1/user', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return { user: updatedUser };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    onSuccess: (data) => {
+      // Mettre à jour les données utilisateur dans le cache
+      queryClient.setQueryData(['user'], data.user);
       onSubscribeSuccess();
       handleClose();
     },
@@ -35,13 +137,7 @@ export function Paywall({ onClose, onSubscribeSuccess }: PaywallProps) {
     setIsVisible(true);
   }, []);
 
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 300); // Attendre la fin de l'animation
-  };
-
   const handleSubscribe = async () => {
-    const plan = PLANS[selectedPlan];
     mutation.mutate();
   };
 
@@ -50,12 +146,11 @@ export function Paywall({ onClose, onSubscribeSuccess }: PaywallProps) {
   return (
     <view
       class={`fixed top-0 left-0 right-0 bottom-0 bg-gray-900 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-      bindtap={handleClose}
     >
       <view 
         class={`fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6
           ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
-        catchtap={(e) => e.stopPropagation()}
+        bindtap={() => {}}
       >
         <view class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center" bindtap={handleClose}>
           <text class="text-2xl text-gray-500">×</text>

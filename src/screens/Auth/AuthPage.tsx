@@ -30,15 +30,39 @@ export function AuthPage() {
       setLoading(true);
       setError('');
 
-      const endpoint = mode === 'signin' ? 'auth/signin' : 'auth/signup';
-      const response = await supabaseFetch<AuthResponse>(endpoint, {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
+      if (mode === 'signin') {
+        const response = await supabaseFetch<AuthResponse>('auth/v1/token?grant_type=password', {
+          method: 'POST',
+          body: JSON.stringify({
+            email,
+            password
+          })
+        });
 
-      setToken(response.token);
-      queryClient.setQueryData(['user'], response.user);
-      navigate('/');
+        setToken(response.access_token);
+        // Fetch user data after successful authentication
+        const userResponse = await supabaseFetch<{ user: AuthResponse['user'] }>('auth/v1/user', {
+          headers: {
+            Authorization: `Bearer ${response.access_token}`
+          }
+        });
+        
+        queryClient.setQueryData(['user'], userResponse.user);
+        navigate('/');
+      } else {
+        // Sign up
+        const response = await supabaseFetch<AuthResponse>('auth/v1/signup', {
+          method: 'POST',
+          body: JSON.stringify({
+            email,
+            password
+          })
+        });
+
+        setToken(response.access_token);
+        queryClient.setQueryData(['user'], response.user);
+        navigate('/');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {

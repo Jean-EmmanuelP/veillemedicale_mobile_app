@@ -10,7 +10,9 @@ const headers = {
 
 export async function supabaseFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   try {
-    const url = `${SUPABASE_URL}/rest/v1/${endpoint.replace(/^\//, '')}`;
+    const isAuthEndpoint = endpoint.startsWith('auth/v1/');
+    const baseEndpoint = isAuthEndpoint ? '' : 'rest/v1/';
+    const url = `${SUPABASE_URL}/${baseEndpoint}${endpoint.replace(/^\//, '')}`;
     console.log('Fetching Supabase URL:', url);
     
     const response = await fetch(url, {
@@ -33,8 +35,12 @@ export async function supabaseFetch<T>(endpoint: string, options: RequestInit = 
       throw new Error(`Supabase API error (${response.status}): ${errorText || response.statusText}`);
     }
 
-    const data = await response.json();
-    return data;
+    const text = await response.text();
+    if (!text) {
+      return {} as T;
+    }
+
+    return JSON.parse(text);
   } catch (error) {
     console.error('Fetch error:', error);
     throw error;

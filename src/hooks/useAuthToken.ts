@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-// Mock localStorage
+// Mock storage pour LynxJS
 let mockStorage: { [key: string]: string } = {};
 
 const AUTH_KEY = 'authToken';
@@ -19,11 +19,13 @@ export function useAuthToken() {
     try {
       if (newToken) {
         mockStorage[AUTH_KEY] = newToken;
+        console.log('Token stored in mock storage:', newToken);
       } else {
         delete mockStorage[AUTH_KEY];
+        console.log('Token removed from mock storage');
       }
-    } catch {
-      console.warn('Failed to access mock storage');
+    } catch (error) {
+      console.warn('Failed to access mock storage:', error);
     }
   };
 

@@ -12,6 +12,7 @@
   "dependencies": {
     "@lynx-js/react": "^0.106.1",
     "@lynx-js/tailwind-preset-canary": "^0.1.0-canary-20250331-60a3eda0",
+    "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/postcss": "^4.0.17",
     "@tanstack/react-query": "^5.70.0",
     "react-router": "^6.22.3",
